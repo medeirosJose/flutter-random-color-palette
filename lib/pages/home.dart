@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_color_palette_gen/pages/palettes.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:developer';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,7 +15,34 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late List<Color> colors = [];
-  late List<List<Color>> palettes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadColors());
+  }
+
+  void _savePalette() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final paletteStrings = prefs.getStringList('savedPalettes') ?? [];
+      final newPaletteString = json.encode(
+        colors.map((color) => colorToHex(color)).toList(),
+      );
+      paletteStrings.add(newPaletteString);
+      await prefs.setStringList('savedPalettes', paletteStrings);
+
+      // Show a toast message to indicate successful saving (optional)
+      Fluttertoast.showToast(
+        msg: "Palette saved!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    } catch (e) {
+      // Handle errors, e.g., show a toast message or log the error
+      print("Error saving palette: $e");
+    }
+  }
 
   Future<void> fetchColors() async {
     final response = await http.post(
@@ -30,81 +56,65 @@ class _HomePageState extends State<HomePage> {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
-      setState(() {
-        colors = List.generate(5, (index) {
-          return Color.fromRGBO(
-            data['result'][index][0],
-            data['result'][index][1],
-            data['result'][index][2],
-            1.0,
-          );
-        });
+      final List<String> newColorsHex = List.generate(5, (index) {
+        final color = Color.fromRGBO(
+          data['result'][index][0],
+          data['result'][index][1],
+          data['result'][index][2],
+          1.0,
+        );
+        return colorToHex(color);
       });
-      savePalettes();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('palettes', newColorsHex);
+      print(prefs.getStringList('palettes'));
+      setState(() {
+        colors = newColorsHex.map((hex) {
+          return Color(int.parse(hex.substring(1, 7), radix: 16) + 0xFF000000);
+        }).toList();
+        print("colors");
+        print(colors);
+      });
+      print("cores geradas:");
+      print(colors);
     } else {
       throw Exception('Failed to load colors');
     }
   }
 
-  Future<void> savePalettes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> palettesJson = palettes
-        .map((palette) => jsonEncode(palette
-            .map((color) => [color.red, color.green, color.blue])
-            .toList()))
-        .toList();
-    await prefs.setStringList('palettes', palettesJson);
-  }
-
-  Future<void> loadPalettes() async {
-    final prefs = await SharedPreferences.getInstance();
-    // log(prefs.getStringList('palettes').toString());
-    final palettesJson = prefs.getStringList('palettes');
-    if (palettesJson != null) {
-      setState(() {
-        palettes = palettesJson
-            .map((json) => (jsonDecode(json) as List<dynamic>)
-                .map((color) =>
-                    Color.fromRGBO(color[0], color[1], color[2], 1.0))
-                .toList())
-            .toList();
-      });
-    } else {
-      palettes = [];
-    }
-  }
-
-  Future<void> checkSavedPalettes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedPalettes = prefs.getStringList('palettes');
-    if (savedPalettes != null) {
-      log('Palettes found in SharedPreferences:');
-      for (var paletteJson in savedPalettes) {
-        log(paletteJson);
+  Future<void> _loadColors() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final palettes = prefs.getStringList('palettes');
+      if (palettes != null && palettes.isNotEmpty) {
+        setState(() {
+          colors = palettes
+              .map((hex) =>
+                  Color(int.parse(hex.substring(1, 7), radix: 16) + 0xFF000000))
+              .toList();
+        });
+      } else {
+        fetchColors();
       }
-    } else {
-      log('No palettes found in SharedPreferences.');
+    } catch (e) {
+      print("Error loading colors: $e");
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    loadPalettes();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🎨 Color Palette Generator'),
+        title: const Text('Color Palette Generator'),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
         centerTitle: true,
         backgroundColor: Colors.blueGrey[900],
       ),
       body: GridView.builder(
-        padding: const EdgeInsets.all(8),
+        padding:
+            const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
+        physics: const BouncingScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 10,
@@ -117,15 +127,14 @@ class _HomePageState extends State<HomePage> {
           return GestureDetector(
             onTap: () {
               Clipboard.setData(ClipboardData(text: '#$hexCode'));
-              // notifica
               Fluttertoast.showToast(
-                msg: "Código HEX copiado: #$hexCode",
+                msg: "Código HEX copiado: $hexCode",
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.TOP,
                 timeInSecForIosWeb: 1,
                 backgroundColor: Colors.black.withOpacity(0.7),
                 textColor: Colors.white,
-                fontSize: 16.0,
+                fontSize: 20.0,
               );
             },
             child: GridTile(
@@ -133,12 +142,12 @@ class _HomePageState extends State<HomePage> {
                 color: color,
                 child: Center(
                   child: Text(
-                    '#$hexCode',
+                    hexCode,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                    ),
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -156,16 +165,16 @@ class _HomePageState extends State<HomePage> {
               FilledButton(
                 onPressed: fetchColors,
                 style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(
-                      const Size(250, 40)), // Tamanho mínimo do botão
-                  padding: MaterialStateProperty.all(const EdgeInsets.symmetric(
-                      horizontal: 16)), // Espaçamento interno do botão
+                  minimumSize: MaterialStateProperty.all(const Size(250, 40)),
+                  padding: MaterialStateProperty.all(
+                      const EdgeInsets.symmetric(horizontal: 16)),
                 ),
-                child: const Text('Gerar Paleta'),
+                child:
+                    const Text('Gerar Paleta', style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(width: 10),
               FilledButton.tonal(
-                onPressed: fetchColors,
+                onPressed: _savePalette,
                 style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all(const Size(50, 40)),
                   padding: MaterialStateProperty.all(
@@ -186,9 +195,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   String colorToHex(Color color) {
-    return '${color.alpha.toRadixString(16).padLeft(2, '0')}'
-        '${color.red.toRadixString(16).padLeft(2, '0')}'
-        '${color.green.toRadixString(16).padLeft(2, '0')}'
-        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 }

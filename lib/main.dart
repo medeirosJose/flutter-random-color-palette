@@ -7,7 +7,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -50,9 +50,9 @@ class _MyAppState extends State<MyApp> {
   Widget _getPage(int index) {
     switch (index) {
       case 0:
-        return HomePage();
+        return const HomePage();
       case 1:
-        return PalettesPage();
+        return const PalettesPage();
       default:
         return Container();
     }
