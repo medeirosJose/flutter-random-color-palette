@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_color_palette_gen/pages/palettes.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -169,8 +168,8 @@ class _HomePageState extends State<HomePage> {
                   padding: MaterialStateProperty.all(
                       const EdgeInsets.symmetric(horizontal: 16)),
                 ),
-                child:
-                    const Text('Gerar Paleta', style: TextStyle(fontSize: 16)),
+                child: const Text('Generate Pallete',
+                    style: TextStyle(fontSize: 16)),
               ),
               const SizedBox(width: 10),
               FilledButton.tonal(

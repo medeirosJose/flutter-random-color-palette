@@ -44,7 +44,7 @@ class _PalettesPageState extends State<PalettesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Paletas Salvas'),
+        title: const Text('Your saved Palettes!'),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
         centerTitle: true,
         backgroundColor: Colors.blueGrey[900],

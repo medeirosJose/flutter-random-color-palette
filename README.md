@@ -1,16 +1,23 @@
-# flutter_color_palette_gen
+# 🎨 Random Color Palette Generator in Flutter
 
-A new Flutter project.
+A small project proposed by [DevProjects](https://www.codementor.io/projects) for beginners in Flutter. The project details and requirements are available in the provided link.
 
-## Getting Started
+As suggested, I utilized the [ColorMind API](http://colormind.io/api-access/), a free REST API, to fetch color palettes.
 
-This project is a starting point for a Flutter application.
+To enhance the project, I added a few extra challenges. One of these was enabling users to save a generated palette. To achieve this, I used [Shared Preferences](https://pub.dev/packages/shared_preferences) to store the palette data, which can then be accessed on another page titled 'Your Palettes'.
 
-A few resources to get you started if this is your first Flutter project:
+Additionaly, I integrated [Flutter Toast](https://pub.dev/packages/fluttertoast) to display useful notifications throughout the app.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## References
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [Flutter Docs](https://docs.flutter.dev/)
+  - [Shared Preferences](https://docs.flutter.dev/cookbook/persistence/key-value)
+  - [JSON Serialization](https://docs.flutter.dev/data-and-backend/serialization/json)
+  - [Fetching Data](https://docs.flutter.dev/cookbook/networking/fetch-data)
+- [MaterialUI](https://docs.flutter.dev/ui/widgets/material)
+- [Flutter Toast](https://pub.dev/packages/fluttertoast)
+
+## Screenshots
+
+![Generator](https://imgur.com/a/i472Qf9)
+![Your Palettes](https://imgur.com/a/sqDEILQ)

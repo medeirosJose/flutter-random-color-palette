@@ -32,11 +32,11 @@ class _MyAppState extends State<MyApp> {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.refresh_outlined),
-              label: 'Gerador',
+              label: 'Generator',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.palette_outlined),
-              label: 'Suas Paletas',
+              label: 'Your Palettes',
             ),
           ],
           currentIndex: _selectedIndex,
