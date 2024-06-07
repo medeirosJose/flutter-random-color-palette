@@ -19,5 +19,5 @@ Additionaly, I integrated [Flutter Toast](https://pub.dev/packages/fluttertoast)
 
 ## Screenshots
 
-![Generator](https://imgur.com/a/i472Qf9)
-![Your Palettes](https://imgur.com/a/sqDEILQ)
+![Generator](https://i.imgur.com/mrtBW9X.png)
+![Your Palettes](https://i.imgur.com/ZfRm4LI.png)
